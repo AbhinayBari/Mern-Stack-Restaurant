@@ -28,7 +28,7 @@ Installation and Setup
 
 1. Clone the Repository
 
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/AbhinayBari/Mern-Stack-Restaurant.git
 
 2. Start the Frontend
 

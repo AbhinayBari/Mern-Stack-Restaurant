@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
 // Signup User
 
 const registerUser = async (req, res) => {
@@ -65,6 +64,64 @@ catch (error) {
 
 };
 
-module.exports = { registerUser, loginUser };   
 
+
+const googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ message: "Google token is required" });
+    }
+
+    // Verify Google/Firebase user on the backend
+const decoded = await adminAuth.verifyIdToken(idToken);
+
+    if (!decoded.email) {
+      return res.status(400).json({ message: "Google email not found" });
+    }
+
+    let user = await User.findOne({
+      email: decoded.email.toLowerCase(),
+    });
+
+    if (!user) {
+      const baseName = (decoded.name || decoded.email.split("@")[0])
+        .replace(/[^a-zA-Z0-9_]/g, "")
+        .slice(0, 20) || "googleuser";
+
+      user = await User.create({
+        username: `${baseName}_${decoded.uid.slice(-6)}`,
+        email: decoded.email.toLowerCase(),
+        password: undefined,
+        role: "user",
+      });
+    }
+
+    // Create the same JWT format as email/password login
+    const token = jwt.sign(
+      { id: user._id.toString(), role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      message: "Google login successful",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Google login error:", error.message);
+    return res.status(401).json({
+      message: "Google login failed. Please try again.",
+    });
+  }
+};
+
+module.exports = { registerUser, loginUser, googleLogin };
 

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Cart.css";
@@ -5,16 +6,20 @@ import "./Cart.css";
 function Cart() {
   const navigate = useNavigate();
 
+  // Load cart from localStorage
   const [cart, setCart] = useState(() => {
     try {
-      const savedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const savedCart = JSON.parse(
+        localStorage.getItem("cart") || "[]"
+      );
+
       return Array.isArray(savedCart) ? savedCart : [];
-    } catch (error) {
+    } catch {
       return [];
     }
   });
 
-  // Update cart from localStorage
+  // Sync cart updates
   useEffect(() => {
     const updateCart = () => {
       try {
@@ -23,14 +28,12 @@ function Cart() {
         );
 
         setCart(Array.isArray(savedCart) ? savedCart : []);
-      } catch (error) {
+      } catch {
         setCart([]);
       }
     };
 
     window.addEventListener("cartUpdated", updateCart);
-
-    // Sync if localStorage changes in another tab
     window.addEventListener("storage", updateCart);
 
     return () => {
@@ -39,7 +42,7 @@ function Cart() {
     };
   }, []);
 
-  // Save cart and notify other components
+  // Save updated cart
   const saveCart = (updatedCart) => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     setCart(updatedCart);
@@ -48,40 +51,46 @@ function Cart() {
 
   // Increase or decrease quantity
   const updateQuantity = (id, change) => {
-    const updatedCart = cart
-      .map((item) => {
-        if (item._id !== id) return item;
+    const updatedCart = cart.map((item) => {
+      if (item._id !== id) {
+        return item;
+      }
 
-        const currentQuantity = Math.max(
-          1,
-          Number(item.quantity) || 1
-        );
+      const quantity = Math.max(
+        1,
+        Number(item.quantity) || 1
+      );
 
-        return {
-          ...item,
-          quantity: currentQuantity + change,
-        };
-      })
-      .filter((item) => Number(item.quantity) > 0);
+      return {
+        ...item,
+        quantity: quantity + change,
+      };
+    });
 
     saveCart(updatedCart);
   };
 
-  // Remove item from cart
+  // Remove item
   const removeItem = (id) => {
-    const updatedCart = cart.filter((item) => item._id !== id);
+    const updatedCart = cart.filter(
+      (item) => item._id !== id
+    );
+
     saveCart(updatedCart);
   };
 
   // Calculate total price
   const totalPrice = cart.reduce((total, item) => {
     const price = Number(item.price) || 0;
-    const quantity = Math.max(0, Number(item.quantity) || 1);
+    const quantity = Math.max(
+      1,
+      Number(item.quantity) || 1
+    );
 
     return total + price * quantity;
   }, 0);
 
-  // Go to checkout
+  // Navigate to checkout
   const handleCheckout = () => {
     if (cart.length === 0) {
       alert("Your cart is empty!");
@@ -98,7 +107,12 @@ function Cart() {
       {cart.length === 0 ? (
         <div className="empty-cart">
           <p>Your cart is empty.</p>
-          <button className="Menu-btn"onClick={() => navigate("/menu")}>
+
+          <button
+            type="button"
+            className="Menu-btn"
+            onClick={() => navigate("/menu")}
+          >
             Browse Menu
           </button>
         </div>
@@ -113,7 +127,10 @@ function Cart() {
               );
 
               return (
-                <div className="cart-item" key={item._id}>
+                <div
+                  className="cart-item"
+                  key={item._id}
+                >
                   <img
                     src={item.image}
                     alt={item.name || "Food item"}
@@ -125,13 +142,17 @@ function Cart() {
                   <div className="cart-item-info">
                     <h3>{item.name || "Food Item"}</h3>
 
-                    <p>Price: ₹{price.toFixed(2)}</p>
+                    <p>
+                      Price: ₹{price.toFixed(2)}
+                    </p>
 
                     <div className="quantity-controls">
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item._id, -1)}
-                        aria-label={`Decrease ${item.name} quantity`}
+                        onClick={() =>
+                          updateQuantity(item._id, -1)
+                        }
+                        aria-label="Decrease quantity"
                       >
                         −
                       </button>
@@ -140,15 +161,18 @@ function Cart() {
 
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item._id, 1)}
-                        aria-label={`Increase ${item.name} quantity`}
+                        onClick={() =>
+                          updateQuantity(item._id, 1)
+                        }
+                        aria-label="Increase quantity"
                       >
                         +
                       </button>
                     </div>
 
                     <p>
-                      Subtotal: ₹{(price * quantity).toFixed(2)}
+                      Subtotal: ₹
+                      {(price * quantity).toFixed(2)}
                     </p>
 
                     <button
@@ -164,7 +188,9 @@ function Cart() {
           </div>
 
           <div className="cart-summary">
-            <h2>Total: ₹{totalPrice.toFixed(2)}</h2>
+            <h2>
+              Total: ₹{totalPrice.toFixed(2)}
+            </h2>
 
             <button
               type="button"

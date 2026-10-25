@@ -1,70 +1,119 @@
-import { useNavigate } from "react-router-dom";
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../firebase";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
 import "../App.css";
-
-const handleGoogleLogin = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    console.log("User Info:", user);
-    // Yahan pe aap user info ko state ya context me store kar sakte hain
-  }
-
-  catch (error) {
-    console.error("Error during Google login:", error);
-  }
-}
 
 function Login() {
   const navigate = useNavigate();
-  const handleLogin = (e) => {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Login form submitted");
-    navigate("/");
-  }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      if (!data.token) {
+        throw new Error("Login successful, but token was not received.");
+      }
+
+      localStorage.setItem("token", data.token);
+
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      window.dispatchEvent(new Event("authUpdated"));
+
+      navigate("/");
+    } catch (err) {
+      setError(
+        err.message === "Failed to fetch"
+          ? "Server se connection nahi ho raha. Backend check karo."
+          : err.message || "Login failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
         <h1>Welcome Back 👋</h1>
-        <p className="auth-subtitle">Login to Mern stack Restaurant</p>
+
+        <p className="auth-subtitle">
+          Login to MERN Stack Restaurant
+        </p>
 
         <form onSubmit={handleLogin}>
-          <label>Email</label>
+          <label htmlFor="email">Email</label>
+
           <input
+            id="email"
             type="email"
             placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
             required
           />
 
-          <label>Password</label>
+          <label htmlFor="password">Password</label>
+
           <input
+            id="password"
             type="password"
             placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
             required
           />
 
-          <button type="submit" className="primary-btn">
-            Login
+          {error && (
+            <p className="checkout-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            className="primary-btn"
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        <div className="divider">
-          <span>OR</span>
-        </div>
-
-        <button
-          type="button"
-          className="google-btn"
-          onClick={handleGoogleLogin}
-        >
-          <span className="google-icon">G</span>
-          Continue with Google
-        </button>
-
         <p className="switch-text">
           Don't have an account?{" "}
-          <a href="/register">Sign Up</a>
+          <Link to="/register">Sign Up</Link>
         </p>
       </div>
     </div>

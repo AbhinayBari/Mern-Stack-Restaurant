@@ -7,7 +7,7 @@ function Menu() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/menu")
+    fetch("https://mern-stack-restaurant-finj.onrender.com/api/menu")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch menu");

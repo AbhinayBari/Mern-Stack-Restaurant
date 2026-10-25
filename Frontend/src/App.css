@@ -1,3 +1,5 @@
+
+
 * {
   margin: 0;
   padding: 0;
@@ -6,7 +8,7 @@
 
 body {
   font-family: Arial, sans-serif;
-  background: #111;
+  background-color:#181818;
   color: white;
 }
 
@@ -45,6 +47,11 @@ body {
   color: white;
   font-size: 12px;
   font-weight: bold;
+
+}
+
+.cart-page {
+  background-color: black;
 }
 
 .nav-links {
@@ -82,7 +89,7 @@ body {
   padding: 0 8%;
   background:
     linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)),
-    url("https://as2.ftcdn.net/v2/jpg/09/05/86/21/1000_F_905862175_BZpru4xXEDeIdTmbABgz0HuF3b9DdTBU.jpg")
+    url("https://png.pngtree.com/background/20230528/original/pngtree-table-with-many-indian-foods-picture-image_2778309.jpg")
     center/cover;
 }
 
@@ -422,3 +429,11 @@ body {
   background: #e67e22;
   color: white;
 }
+
+
+
+
+
+
+
+

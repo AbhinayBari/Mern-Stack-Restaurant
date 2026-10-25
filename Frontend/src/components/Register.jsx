@@ -38,7 +38,7 @@ function Register() {
       setLoading(true);
 
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "https://mern-stack-restaurant-finj.onrender.com/api/auth/register",
         {
           username: username.trim(),
           email: email.trim(),
